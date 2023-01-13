@@ -31,8 +31,7 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 
-
-
+# Should this class be there in the first place
 class Portal(): 
     db = SQLAlchemy()
     app = Flask(__name__)
