@@ -1,3 +1,4 @@
+# Imported libraries
 import os
 import pathlib
 import requests
@@ -7,7 +8,7 @@ from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
 
-
+# Initiate the app w/ Flask
 app = Flask("Google Login App")
 app.secret_key = "thehiddengeniusproject.org"
 
@@ -23,14 +24,13 @@ flow = Flow.from_client_secrets_file(
     redirect_uri="http://127.0.0.1:5000/callback"
 )
 
-
+# Function authenticates access to the platform. 
 def login_is_required(function):
     def wrapper(*args, **kwargs):
         if "google_id" not in session:
             return abort(401)  # Authorization required
         else:
             return function()
-
     return wrapper
 
 # This function will create the state to receive and response from the google api. 
