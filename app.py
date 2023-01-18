@@ -60,6 +60,7 @@ def callback():
 
     session["google_id"] = id_info.get("sub")
     session["name"] = id_info.get("name")
+    session["email"] = id_info.get("email")
     return redirect("/protected_area")
 
 
@@ -77,7 +78,7 @@ def index():
 @app.route("/protected_area")
 @login_is_required
 def protected_area():
-    return f"Hello {session['name']}! <br/> <a href='/logout'><button>Logout</button></a>"
+    return f"Hello {session['name']}, {session['email']}! <br/> <a href='/logout'><button>Logout</button></a>"
 
 
 if __name__ == "__main__":
