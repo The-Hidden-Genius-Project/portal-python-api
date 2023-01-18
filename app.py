@@ -11,6 +11,7 @@ import google.auth.transport.requests
 app = Flask("Google Login App")
 app.secret_key = "thehiddengeniusproject.org"
 
+# This is the line that we use to test localhost, remove in production. 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 GOOGLE_CLIENT_ID = "371018060880-7pf78bv430u3erbcujo11gpu7qlgjfm2.apps.googleusercontent.com"
@@ -32,14 +33,14 @@ def login_is_required(function):
 
     return wrapper
 
-
+# This function will create the state to receive and response from the google api. 
 @app.route("/login")
 def login():
     authorization_url, state = flow.authorization_url()
     session["state"] = state
     return redirect(authorization_url)
 
-
+# This function returns data back to us after user confirmations.
 @app.route("/callback")
 def callback():
     flow.fetch_token(authorization_response=request.url)
@@ -64,22 +65,23 @@ def callback():
     return redirect("/protected_area")
 
 
+# This email just clears the session, removing user. 
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect("/")
 
-
+# Dashboard returned to use when we have all the things we need. 
 @app.route("/")
 def index():
     return "Hello World <a href='/login'><button>Login</button></a>"
 
-
+# Only logged in users can call this function. 
 @app.route("/protected_area")
 @login_is_required
 def protected_area():
     return f"Hello {session['name']}, {session['email']}! <br/> <a href='/logout'><button>Logout</button></a>"
 
-
+# Run the app. 
 if __name__ == "__main__":
     app.run(debug=True)
