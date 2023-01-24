@@ -2,6 +2,7 @@
 import os
 import pathlib
 import requests
+from api import Initialize_Portal
 from flask import Flask, session, abort, redirect, request
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
@@ -9,8 +10,7 @@ from pip._vendor import cachecontrol
 import google.auth.transport.requests
 
 # Initiate the app w/ Flask
-app = Flask("Google Login App")
-app.secret_key = "thehiddengeniusproject.org"
+app = Initialize_Portal()
 
 # This is the line that we use to test localhost, remove in production. 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -74,6 +74,7 @@ def callback():
 
     # check if user email is valid
     if validate_email_domain(session["email"]):
+        # check if returning user or new: TODO
         return redirect("/protected_area")
     return logout()
 
