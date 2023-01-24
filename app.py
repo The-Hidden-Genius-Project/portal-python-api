@@ -33,6 +33,15 @@ def login_is_required(function):
             return function()
     return wrapper
 
+
+# Validate email domain 
+def validate_email_domain(email): 
+    words = email.split("@")
+    if ("hgs" in words):
+        return words[2] == "hiddengeniusproject.org"
+    else: 
+        return words[1] == "hiddengeniusproject.org"
+
 # This function will create the state to receive and response from the google api. 
 @app.route("/login")
 def login():
@@ -62,7 +71,12 @@ def callback():
     session["google_id"] = id_info.get("sub")
     session["name"] = id_info.get("name")
     session["email"] = id_info.get("email")
-    return redirect("/protected_area")
+
+    # check if user email is valid
+    if validate_email_domain(session["email"]):
+        return redirect("/protected_area")
+    return logout()
+
 
 
 # This email just clears the session, removing user. 
