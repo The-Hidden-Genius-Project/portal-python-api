@@ -3,11 +3,14 @@ import os
 import pathlib
 import requests
 from api import Initialize_Portal
-from flask import Flask, session, abort, redirect, request
+from flask import Flask, session, abort, redirect, request, render_template
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
+from api.models.user import User
+from api.models.attendance import Attendance
+
 
 # Initiate the app w/ Flask
 app = Initialize_Portal()
@@ -72,11 +75,14 @@ def callback():
     session["name"] = id_info.get("name")
     session["email"] = id_info.get("email")
 
+    # creating user if not existing. 
+    user = User(email=session["email"], google_id=session["google_id"])
+    attendance = Attendance(user_id= user.id)
+
+    print(User.query.all())
+
     # check if user email is valid
-    if validate_email_domain(session["email"]):
-        # check if returning user or new: TODO
-        return redirect("/protected_area")
-    return logout()
+    return redirect("/protected_area")
 
 
 
