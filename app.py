@@ -12,6 +12,7 @@ import google.auth.transport.requests
 from api.models.user import User
 from api.models.job import Job
 from api.models.organization import Organization
+from api.models.application import Application
 from flask import jsonify
 
 # Initiate the app w/ Flask
@@ -111,7 +112,7 @@ def jobs():
     return serialzied, 200
 
 # new Jobs
-@app.route("/new_job", methods=['POST'])
+@app.route("/jobs/new", methods=['POST'])
 def new_job():
     if request.method == 'POST':
         job_title = request.args.get('title')
@@ -132,6 +133,10 @@ def new_job():
         except: 
             return "Something went wrong", 401
         
+# GET specific job page
+@app.route('/jobs/<id>', methods=['GET'])
+def show_job(id):
+    return Job.query.get(id).serialize(), 200
 
 
 
@@ -161,6 +166,39 @@ def new_organization():
             return "", 204
         except: 
             return "Something went wrong", 401
+        
+
+# GET specific organization page
+@app.route('/organizations/<id>', methods=['GET'])
+def show_organization(id):
+    return Organization.query.get(id).serialize(), 200
+
+
+
+        
+# APPLICATIONS route
+@app.route('/jobs/<id>/applications', methods=['GET'])
+def applications(id):
+    apps = Application.query.filter_by(job_id = id)
+    serialzied = [a.serialize() for a in apps]
+    return serialzied, 200
+
+@app.route('/applications/new', methods=['POST'])
+def new_application():
+    if request.method == 'POST':
+        job_id = request.args.get('job_id')
+        user_id = request.args.get('user_id')
+        new_application = Application(
+            user_id=user_id, 
+            job_id=job_id
+        )
+
+        try: 
+            db.session.add(new_application)
+            db.session.commit()
+            return "", 204
+        except: 
+            return "Something went wrong", 401
 
 # USERS routes
 @app.route('/users', methods=['GET'])
@@ -169,7 +207,7 @@ def users():
     serialzied = [u.serialize() for u in users]
     return serialzied, 200
 
-@app.route('/new_user', methods=['POST'])
+@app.route('/users/new', methods=['POST'])
 def new_user():
     if request.method == 'POST':
         user_google_id = request.args.get('google_id')

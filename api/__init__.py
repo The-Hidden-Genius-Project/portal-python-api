@@ -15,6 +15,7 @@ def Initialize_Portal():
     from api.models.user import User
     from api.models.job import Job
     from api.models.organization import Organization
+    from api.models.application import Application
     
     create_database(app)
 
