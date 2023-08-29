@@ -8,4 +8,15 @@ class Job(db.Model):
     title = db.Column(db.String(20), nullable=False)
     description = db.Column(db.String(80), nullable=False)
     type = db.Column(db.String(80), nullable=False) # should this be an option # figure out if this should be a real object
+    organization_id = db.Column(db.Integer, db.ForeignKey('organization.id'))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "type": self.type,
+            "organation_id": self.organization_id,
+            "date_created": self.date_created
+        }

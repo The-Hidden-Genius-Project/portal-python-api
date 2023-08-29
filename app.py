@@ -1,19 +1,21 @@
 # Imported libraries
+import json
 import os
 import pathlib
 import requests
 from api import Initialize_Portal
-from flask import Flask, session, abort, redirect, request, render_template
+from flask import Flask, session, abort, redirect, request, render_template, Response
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from api.models.user import User
-from api.models.attendance import Attendance
-
+from api.models.job import Job
+from api.models.organization import Organization
+from flask import jsonify
 
 # Initiate the app w/ Flask
-app = Initialize_Portal()
+app, db = Initialize_Portal()
 
 # This is the line that we use to test localhost, remove in production. 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -71,23 +73,23 @@ def callback():
         audience=GOOGLE_CLIENT_ID
     )
 
-    session["google_id"] = id_info.get("sub")
-    session["name"] = id_info.get("name")
-    session["email"] = id_info.get("email")
+    session["google_id"] = id_info['sub']
+    session["name"] = id_info['name']
+    session["email"] = id_info['email']
+
 
     # creating user if not existing. 
     user = User(email=session["email"], google_id=session["google_id"])
-    attendance = Attendance(user_id= user.id)
 
     print(User.query.all())
 
     # check if user email is valid
-    return redirect("/protected_area")
+    return redirect("/dashboard")
 
 
 
 # This email just clears the session, removing user. 
-@app.route("/logout")
+@app.route("/logout") 
 def logout():
     session.clear()
     return redirect("/")
@@ -97,11 +99,103 @@ def logout():
 def index():
     return "Hello World <a href='/login'><button>Login</button></a>"
 
-# Only logged in users can call this function. 
-@app.route("/protected_area")
-@login_is_required
-def protected_area():
-    return f"Hello {session['name']}, {session['email']}! <br/> <a href='/logout'><button>Logout</button></a>"
+
+
+
+
+# Jobs serialized into JSON data
+@app.route('/jobs', methods=['GET'])
+def jobs():
+    jobs = Job.query.all()
+    serialzied = [j.serialize() for j in jobs]
+    return serialzied, 200
+
+# new Jobs
+@app.route("/new_job", methods=['POST'])
+def new_job():
+    if request.method == 'POST':
+        job_title = request.args.get('title')
+        job_description = request.args.get('description')
+        job_type = request.args.get('type')
+        job_organization_id = request.args.get('organization_id')
+        new_job = Job(
+            title=job_title, 
+            description=job_description, 
+            type=job_type, 
+            organization_id=job_organization_id
+        )
+
+        try: 
+            db.session.add(new_job)
+            db.session.commit()
+            return "", 204
+        except: 
+            return "Something went wrong", 401
+        
+
+
+
+# ORGANIZATIONS routes
+@app.route('/organizations', methods=['GET'])
+def organizations():
+    organizations = Organization.query.all()
+    serialzied = [o.serialize() for o in organizations]
+    return serialzied, 200
+
+
+@app.route('/new_organization', methods=['POST'])
+def new_organization():
+    if request.method == 'POST':
+        org_name = request.args.get('name')
+        org_location = request.args.get('location')
+        org_admin = request.args.get('user_id')
+        new_organization = Organization(
+            name=org_name, 
+            location=org_location, 
+            user_id=org_admin   
+        )
+
+        try: 
+            db.session.add(new_organization)
+            db.session.commit()
+            return "", 204
+        except: 
+            return "Something went wrong", 401
+
+# USERS routes
+@app.route('/users', methods=['GET'])
+def users():
+    users = User.query.all()
+    serialzied = [u.serialize() for u in users]
+    return serialzied, 200
+
+@app.route('/new_user', methods=['POST'])
+def new_user():
+    if request.method == 'POST':
+        user_google_id = request.args.get('google_id')
+        user_email = request.args.get('email')
+        user_name = request.args.get('name')
+        user_role = request.args.get('role')
+        new_user= User(
+            google_id=user_google_id, 
+            email=user_email, 
+            name=user_name, 
+            role=user_role   
+        )
+
+        try: 
+            db.session.add(new_user)
+            db.session.commit()
+            return "", 204
+        except: 
+            return "Something went wrong", 401
+
+
+
+# api page
+@app.route('/api')
+def api():
+    return render_template('api.html')
 
 # Run the app. 
 if __name__ == "__main__":

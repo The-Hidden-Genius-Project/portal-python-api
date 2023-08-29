@@ -14,14 +14,14 @@ def Initialize_Portal():
 
     from api.models.user import User
     from api.models.job import Job
-    from api.models.attendance import Attendance
+    from api.models.organization import Organization
     
     create_database(app)
 
-    return app
+    return app, db
 
 def create_database(app):
-    if not path.exists('../instance/' + DB_NAME):
+    if not path.exists('instance/' + DB_NAME):
         app.app_context().push()
         db.create_all()
         print('Created Database!')
