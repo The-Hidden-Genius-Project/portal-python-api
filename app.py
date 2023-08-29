@@ -139,7 +139,6 @@ def show_job(id):
     return Job.query.get(id).serialize(), 200
 
 
-
 # ORGANIZATIONS routes
 @app.route('/organizations', methods=['GET'])
 def organizations():
@@ -174,8 +173,6 @@ def show_organization(id):
     return Organization.query.get(id).serialize(), 200
 
 
-
-        
 # APPLICATIONS route
 @app.route('/jobs/<id>/applications', methods=['GET'])
 def applications(id):
@@ -183,10 +180,10 @@ def applications(id):
     serialzied = [a.serialize() for a in apps]
     return serialzied, 200
 
-@app.route('/applications/new', methods=['POST'])
-def new_application():
+@app.route('/jobs/<id>/applications/new', methods=['POST'])
+def new_application(id):
     if request.method == 'POST':
-        job_id = request.args.get('job_id')
+        job_id = id
         user_id = request.args.get('user_id')
         new_application = Application(
             user_id=user_id, 
