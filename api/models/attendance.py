@@ -7,7 +7,6 @@ class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'))
     cohort_id = db.Column(db.Integer, db.ForeignKey('cohort.id'))
-    students = db.relationship('Student', backref='attendance')
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 

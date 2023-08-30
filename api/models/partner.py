@@ -5,7 +5,6 @@ class Partner(db.Model):
     name = db.Column(db.String)
     company = db.Column(db.String)
     position = db.Column(db.String)
-    jobs = db.relationship('Job', backref="partner")
     organization_id = db.Column(db.Integer, db.ForeignKey('organization.id'))
 
     def serialize(self):
@@ -14,6 +13,6 @@ class Partner(db.Model):
             "name": self.name,
             "company": self.company, 
             "position": self.position, 
-            "jobs": self.jobs
+            "organization_id": self.organization_id
         }
 

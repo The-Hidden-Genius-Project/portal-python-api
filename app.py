@@ -24,6 +24,8 @@ from api.models.partner import Partner
 from api.models.site import Site
 from api.models.student import Student
 from api.models.bonus import Bonus
+from api.models.stipend import Stipend
+from api.models.attendance import Attendance
 ###################################################################
 
 # Initiate the app w/ Flask
@@ -109,14 +111,15 @@ def index():
 
 
 
-# Jobs serialized into JSON data
+####################### Jobs Info #####################
+
 @app.route('/jobs', methods=['GET'])
 def jobs():
     jobs = Job.query.all()
     serialzied = [j.serialize() for j in jobs]
     return serialzied, 200
 
-# new Jobs
+
 @app.route("/jobs/new", methods=['POST'])
 def new_job():
     if request.method == 'POST':
@@ -137,14 +140,15 @@ def new_job():
             return "", 204
         except: 
             return "Something went wrong", 401
-        
-# GET specific job page
+
+
 @app.route('/jobs/<id>', methods=['GET'])
 def show_job(id):
     return Job.query.get(id).serialize(), 200
 
 
-# ORGANIZATIONS routes
+####################### Organization Info #####################
+
 @app.route('/organizations', methods=['GET'])
 def organizations():
     organizations = Organization.query.all()
@@ -152,7 +156,7 @@ def organizations():
     return serialzied, 200
 
 
-@app.route('/new_organization', methods=['POST'])
+@app.route('/organizations/new', methods=['POST'])
 def new_organization():
     if request.method == 'POST':
         org_name = request.args.get('name')
@@ -161,7 +165,7 @@ def new_organization():
         new_organization = Organization(
             name=org_name, 
             location=org_location, 
-            user_id=org_admin   
+            partner_id=org_admin   
         )
 
         try: 
@@ -178,13 +182,8 @@ def show_organization(id):
     return Organization.query.get(id).serialize(), 200
 
 
-# APPLICATIONS route
-@app.route('/jobs/<id>/applications', methods=['GET'])
-def applications(id):
-    apps = Application.query.filter_by(job_id = id)
-    serialzied = [a.serialize() for a in apps]
-    return serialzied, 200
 
+####################### Applications Info #####################
 @app.route('/jobs/<id>/applications/new', methods=['POST'])
 def new_application(id):
     if request.method == 'POST':
@@ -202,29 +201,116 @@ def new_application(id):
         except: 
             return "Something went wrong", 401
 
+@app.route('/jobs/<id>/applications', methods=['GET'])
+def applications(id):
+    apps = Application.query.filter_by(job_id = id)
+    serialzied = [a.serialize() for a in apps]
+    return serialzied, 200
 
 
-# new Jobs
-@app.route("/attendances/new", methods=['POST'])
-def new_attendance():
+####################### Admin Info #####################
+@app.route("/admins/new", methods=['POST'])
+def new_admin():
     if request.method == 'POST':
-        admin_id = request.args.get('admin_id')
-        cohort_id = request.args.get('cohort_id')
-        students = request.args.get('students')
-        new_attedance = Attendance(
-            admin_id=admin_id, 
-            cohort_id=cohort_id, 
-            students=students
+        name = request.args.get('name')
+        email = request.args.get('email')
+        department_id = request.args.get('department_id')
+        site_id = request.args.get('site_id')
+        new_admin = Admin(
+            name=name, 
+            email=email, 
+            department_id=department_id,
+            site_id=site_id
         )
 
         try: 
-            db.session.add(new_attedance)
+            db.session.add(new_admin)
             db.session.commit()
             return "", 204
         except: 
             return "Something went wrong", 401
 
 
+@app.route('/admins', methods=['GET'])
+def admins():
+    admins = Admin.query.all()
+    serialzied = [a.serialize() for a in admins]
+    return serialzied, 200
+
+
+
+####################### Site Info #####################
+@app.route("/sites/new", methods=['POST'])
+def new_site():
+    if request.method == 'POST':
+        site = request.args.get('location')
+        new_site = Site(location=site)
+        try: 
+            db.session.add(new_site)
+            db.session.commit()
+            return "", 204
+        except: 
+            return "Something went wrong", 401
+
+
+
+@app.route('/sites', methods=['GET'])
+def sites():
+    sites = Site.query.all()
+    serialzied = [s.serialize() for s in sites]
+    return serialzied, 200
+
+
+################# Cohort Info  ######################
+@app.route("/cohorts/new", methods=['POST'])
+def new_cohort():
+    if request.method == 'POST':
+        name = request.args.get('name')
+        site_id = request.args.get('site_id')
+        new_cohort = Cohort(name=name, site_id=site_id)
+        try: 
+            db.session.add(new_cohort)
+            db.session.commit()
+            return "", 204
+        except: 
+            return "Something went wrong", 401
+
+
+
+@app.route('/cohorts', methods=['GET'])
+def cohorts():
+    cohorts = Cohort.query.all()
+    serialzied = [c.serialize() for c in cohorts]
+    return serialzied, 200
+
+
+########################   Partner Info #########################
+
+@app.route("/partners/new", methods=['POST'])
+def new_partner():
+    if request.method == 'POST':
+        name = request.args.get('name')
+        company = request.args.get('company')
+        position = request.args.get('position')
+        organization_id = request.args.get('organization_id')
+        partner = Partner(name=name, company=company, position=position, organization_id=organization_id)
+        try: 
+            db.session.add(partner)
+            db.session.commit()
+            return "", 204
+        except: 
+            return "Something went wrong", 401
+
+
+@app.route('/partners', methods=['GET'])
+def partners():
+    partners = Partner.query.all()
+    serialzied = [p.serialize() for p in partners]
+    return serialzied, 200
+
+
+
+######################### Jobs Info ###########################
 
 
 # api page

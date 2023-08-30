@@ -10,5 +10,6 @@ class Cohort(db.Model):
         return {
             "id": self.id, 
             "name": self.name, 
-            "location": self.location
+            "students": self.students,
+            "site_id": self.site_id
         }

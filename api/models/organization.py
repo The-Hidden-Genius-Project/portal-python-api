@@ -13,6 +13,6 @@ class Organization(db.Model):
             "id": self.id,
             "name": self.name,
             "location": self.location,
-            "user_id": self.user_id,
+            "partner_id": self.partner_id,
             "date_created": self.date_created
         }
