@@ -13,6 +13,7 @@ from api.models.user import User
 from api.models.job import Job
 from api.models.organization import Organization
 from api.models.application import Application
+from api.models.attendance import Attendance
 from flask import jsonify
 
 # Initiate the app w/ Flask
@@ -224,6 +225,31 @@ def new_user():
             return "", 204
         except: 
             return "Something went wrong", 401
+
+
+# Attendance
+
+
+# new Jobs
+@app.route("/attendances/new", methods=['POST'])
+def new_attendance():
+    if request.method == 'POST':
+        admin_id = request.args.get('admin_id')
+        cohort_id = request.args.get('cohort_id')
+        students = request.args.get('students')
+        new_attedance = Attendance(
+            admin_id=admin_id, 
+            cohort_id=cohort_id, 
+            students=students
+        )
+
+        try: 
+            db.session.add(new_attedance)
+            db.session.commit()
+            return "", 204
+        except: 
+            return "Something went wrong", 401
+
 
 
 

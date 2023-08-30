@@ -4,7 +4,7 @@ from datetime import datetime
 class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     job_id = db.Column(db.Integer, db.ForeignKey('job.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
     def serialize(self):
