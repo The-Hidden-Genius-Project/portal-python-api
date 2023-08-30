@@ -9,12 +9,22 @@ from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
-from api.models.user import User
+from flask import jsonify
+
+###################################################################
+# Models imported
 from api.models.job import Job
 from api.models.organization import Organization
 from api.models.application import Application
-from api.models.attendance import Attendance
-from flask import jsonify
+from api.models.admin import Admin
+from api.models.assignment import Assignment
+from api.models.cohort import Cohort
+from api.models.department import Department
+from api.models.partner import Partner
+from api.models.site import Site
+from api.models.student import Student
+from api.models.bonus import Bonus
+###################################################################
 
 # Initiate the app w/ Flask
 app, db = Initialize_Portal()
@@ -78,12 +88,6 @@ def callback():
     session["google_id"] = id_info['sub']
     session["name"] = id_info['name']
     session["email"] = id_info['email']
-
-
-    # creating user if not existing. 
-    user = User(email=session["email"], google_id=session["google_id"])
-
-    print(User.query.all())
 
     # check if user email is valid
     return redirect("/dashboard")
@@ -198,36 +202,6 @@ def new_application(id):
         except: 
             return "Something went wrong", 401
 
-# USERS routes
-@app.route('/users', methods=['GET'])
-def users():
-    users = User.query.all()
-    serialzied = [u.serialize() for u in users]
-    return serialzied, 200
-
-@app.route('/users/new', methods=['POST'])
-def new_user():
-    if request.method == 'POST':
-        user_google_id = request.args.get('google_id')
-        user_email = request.args.get('email')
-        user_name = request.args.get('name')
-        user_role = request.args.get('role')
-        new_user= User(
-            google_id=user_google_id, 
-            email=user_email, 
-            name=user_name, 
-            role=user_role   
-        )
-
-        try: 
-            db.session.add(new_user)
-            db.session.commit()
-            return "", 204
-        except: 
-            return "Something went wrong", 401
-
-
-# Attendance
 
 
 # new Jobs

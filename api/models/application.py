@@ -11,6 +11,6 @@ class Application(db.Model):
         return {
             "id": self.id,
             "job_id": self.job_id,
-            "user_id": self.user_id, 
+            "student_id": self.student_id, 
             "date_created": self.date_created
         }

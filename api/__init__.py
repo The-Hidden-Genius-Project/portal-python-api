@@ -12,11 +12,6 @@ def Initialize_Portal():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
 
-    from api.models.user import User
-    from api.models.job import Job
-    from api.models.organization import Organization
-    from api.models.application import Application
-    
     create_database(app)
 
     return app, db

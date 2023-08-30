@@ -5,7 +5,7 @@ class Organization(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
     location = db.Column(db.String)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    partner_id = db.Column(db.Integer, db.ForeignKey('partner.id'))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
     def serialize(self):
