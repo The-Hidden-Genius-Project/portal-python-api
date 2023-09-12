@@ -6,6 +6,7 @@ import requests
 from api import Initialize_Portal
 from flask import Flask, session, abort, redirect, request, render_template, Response
 from google.oauth2 import id_token
+from binascii import hexlify
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
@@ -362,22 +363,15 @@ def new_student():
 
 
 
-######################### Assignments ###########################
+######################### APIKEY ###########################
+
+@app.route('/api_key', methods=['POST'])
+def ApiKey():
+    key = hexlify(os.urandom(16))
+    return key.decode(), 204
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+######################### APIKEY ###########################
 
 
 # api page
