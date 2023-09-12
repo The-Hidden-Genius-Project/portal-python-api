@@ -5,6 +5,8 @@ from datetime import datetime
 # Columns for the database below
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    notes = db.Column(db.String)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'))
     cohort_id = db.Column(db.Integer, db.ForeignKey('cohort.id'))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
@@ -15,6 +17,7 @@ class Attendance(db.Model):
             "id": self.id, 
             "admin_id": self.admin_id, 
             "cohort_id": self.cohort_id, 
-            "students": self.students, 
+            "student_id": self.student_id, 
+            "notes": self.notes,
             "date_created": self.date_created
         }

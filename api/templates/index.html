@@ -8,5 +8,17 @@
 </head>
 <body>
     <p>{{ user.name }}</p>
+
+    <form action="/attendance/new" method="POST"> 
+        <div class="form-group">
+          <div>
+            <select id="myform" name='category' multiple class="form-control"> // addition here
+                <option> Category 01 </option>
+                <option> Category 01 </option>
+                <option> Category 01 </option>
+            </select>
+          </div>
+        </div>
+    </form> 
 </body>
 </html>

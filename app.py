@@ -109,7 +109,7 @@ def index():
 
 
 
-
+###########################################################################################################
 
 ####################### Jobs Info #####################
 
@@ -310,7 +310,74 @@ def partners():
 
 
 
-######################### Jobs Info ###########################
+######################### Attendance ###########################
+@app.route("/attendances/new", methods=['POST', 'GET'])
+def new_attendance():
+    if request.method == 'POST':
+        admin_id = request.args.get('admin_id')
+        cohort_id = request.args.get('cohort_id')
+        student_id = admin_id = request.args.get('student_id')
+        notes = request.args.get('notes')
+       
+        new_attendance = Attendance(notes=notes, admin_id=admin_id, cohort_id=cohort_id, student_id=student_id)
+        
+        try: 
+            db.session.add(new_attendance)
+            db.session.commit()
+            return "", 204    
+        except: 
+            return "something happpend wrong"        
+    return render_template('attendance.html', students=students)
+
+@app.route('/attendances', methods=['GET'])
+def attendances():
+    attendances = Attendance.query.all()
+    serialzied = [a.serialize() for a in attendances]
+    return serialzied, 200
+
+
+
+######################### Students ###########################
+
+
+@app.route('/students', methods=['GET', 'POST'])
+def students():
+    students = Student.query.all()
+    serialzied = [s.serialize() for s in students]
+    return serialzied, 200
+
+
+@app.route("/students/new", methods=['POST'])
+def new_student():
+    if request.method == 'POST':
+        name = request.args.get('name')
+        cohort_id = request.args.get('cohort_id')
+        new_student = Student(name=name, cohort_id=cohort_id)
+        try: 
+            db.session.add(new_student)
+            db.session.commit()
+            return "", 204
+        except: 
+            return "Something went wrong", 40
+
+
+
+######################### Assignments ###########################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # api page
