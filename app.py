@@ -38,6 +38,7 @@ from api.models.attendance import Attendance
 
 from api.controllers.users_controller import UsersController
 from api.controllers.roles_controller import RolesController
+from api.controllers.jobs_controller import JobsController
 ###################################################################
 
 # Initiate the app w/ Flask, DB
@@ -126,6 +127,9 @@ def index():
 
 ###########################################################################################################
 
+######################### ROLES ###################################
+
+
 # Post a new role for each user. 
 @app.route("/roles/new", methods=['POST'])
 def newRole():
@@ -142,6 +146,8 @@ def newRole():
 def roles():
     return RolesController.roles()
 
+
+######################### USERS ###################################
 
 # Post a New User into the database
 @app.route("/users/new", methods=['POST'])
@@ -162,45 +168,30 @@ def newUser():
 def users():
     return UsersController.users()
 
-####################### Jobs Info #####################
+####################### Jobs #####################
 
 @app.route('/jobs', methods=['GET'])
 def jobs():
-    jobs = Job.query.all()
-    serialzied = [j.serialize() for j in jobs]
-    return serialzied, 200
+    return JobsController.jobs()
 
 
 @app.route("/jobs/new", methods=['POST'])
 def newJob():
     if request.method == 'POST':
-        job_title = request.json['title']
-        job_description = request.json['description']
-        job_type = request.json['type']
-        job_partner_id = request.json['partner_id']
-        job_organization_id = request.json['organization_id']
-        new_job = Job(
-            title=job_title, 
-            description=job_description, 
-            type=job_type, 
-            partner_id=job_partner_id, 
-            organization_id=job_organization_id
-        )
-        print(new_job.description)
-        print(new_job.description)
-        try: 
-            db.session.add(new_job)
-            db.session.commit()
-
-            return "", 204
-        except SQLAlchemyError as e: 
-            return "".format(e)
-    return "", 200
+        job_title = request.args.get('title')
+        job_description = request.args.get('description')
+        job_type = request.args.get('type')
+        job_partner_id = request.args.get('partner_id')
+        job_organization_id = request.args.get('organization_id')
+        response = JobsController.newJob(job_title, job_description, job_type, job_partner_id, job_organization_id, job_organization_id)
+        return response 
+    else: 
+        return "something went wrong"
 
 
 @app.route('/jobs/<id>', methods=['GET'])
 def showJob(id):
-    return Job.query.get(id).serialize(), 200
+    return JobsController.showJob(id)
 
 
 ####################### Organization Info #####################
