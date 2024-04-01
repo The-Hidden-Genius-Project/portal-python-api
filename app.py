@@ -11,10 +11,15 @@ from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from flask import jsonify
+from sqlalchemy.exc import SQLAlchemyError
+
+
 
 ###################################################################
 # Models imported
 from api.models.job import Job
+from api.models.user import User
+from api.models.role import Role
 from api.models.organization import Organization
 from api.models.application import Application
 from api.models.admin import Admin
@@ -27,9 +32,15 @@ from api.models.student import Student
 from api.models.bonus import Bonus
 from api.models.stipend import Stipend
 from api.models.attendance import Attendance
+
+
+#### controllers ####
+
+from api.controllers.users_controller import UsersController
+from api.controllers.roles_controller import RolesController
 ###################################################################
 
-# Initiate the app w/ Flask
+# Initiate the app w/ Flask, DB
 app, db = Initialize_Portal()
 
 # This is the line that we use to test localhost, remove in production. 
@@ -92,6 +103,9 @@ def callback():
     session["name"] = id_info['name']
     session["email"] = id_info['email']
 
+
+    print(session['google_id'])
+    print(session['name'])
     # check if user email is valid
     return redirect("/dashboard")
 
@@ -112,6 +126,42 @@ def index():
 
 ###########################################################################################################
 
+# Post a new role for each user. 
+@app.route("/roles/new", methods=['POST'])
+def newRole():
+    if request.method == 'POST':
+        response = RolesController.newRole(
+            request.args.get("name")
+        )
+        return response
+    else: 
+        return "something went wrong"
+    
+# Get all roles for each user
+@app.route("/roles", methods=['GET'])
+def roles():
+    return RolesController.roles()
+
+
+# Post a New User into the database
+@app.route("/users/new", methods=['POST'])
+def newUser():
+    if request.method == 'POST':
+        response = UsersController.newUser(
+            request.args.get("google_id"),
+            request.args.get("name"),
+            request.args.get("email")
+        )
+        return response
+    else: 
+        return "something went wrong"
+
+
+# Get all Users
+@app.route("/users", methods=['GET'])
+def users():
+    return UsersController.users()
+
 ####################### Jobs Info #####################
 
 @app.route('/jobs', methods=['GET'])
@@ -122,29 +172,34 @@ def jobs():
 
 
 @app.route("/jobs/new", methods=['POST'])
-def new_job():
+def newJob():
     if request.method == 'POST':
-        job_title = request.args.get('title')
-        job_description = request.args.get('description')
-        job_type = request.args.get('type')
-        job_organization_id = request.args.get('organization_id')
+        job_title = request.json['title']
+        job_description = request.json['description']
+        job_type = request.json['type']
+        job_partner_id = request.json['partner_id']
+        job_organization_id = request.json['organization_id']
         new_job = Job(
             title=job_title, 
             description=job_description, 
             type=job_type, 
+            partner_id=job_partner_id, 
             organization_id=job_organization_id
         )
-
+        print(new_job.description)
+        print(new_job.description)
         try: 
             db.session.add(new_job)
             db.session.commit()
+
             return "", 204
-        except: 
-            return "Something went wrong", 401
+        except SQLAlchemyError as e: 
+            return "".format(e)
+    return "", 200
 
 
 @app.route('/jobs/<id>', methods=['GET'])
-def show_job(id):
+def showJob(id):
     return Job.query.get(id).serialize(), 200
 
 
@@ -158,7 +213,7 @@ def organizations():
 
 
 @app.route('/organizations/new', methods=['POST'])
-def new_organization():
+def newOrganization():
     if request.method == 'POST':
         org_name = request.args.get('name')
         org_location = request.args.get('location')
@@ -179,14 +234,14 @@ def new_organization():
 
 # GET specific organization page
 @app.route('/organizations/<id>', methods=['GET'])
-def show_organization(id):
+def showOrganization(id):
     return Organization.query.get(id).serialize(), 200
 
 
 
 ####################### Applications Info #####################
 @app.route('/jobs/<id>/applications/new', methods=['POST'])
-def new_application(id):
+def newApplication(id):
     if request.method == 'POST':
         job_id = id
         user_id = request.args.get('user_id')
@@ -211,7 +266,7 @@ def applications(id):
 
 ####################### Admin Info #####################
 @app.route("/admins/new", methods=['POST'])
-def new_admin():
+def newAdmin():
     if request.method == 'POST':
         name = request.args.get('name')
         email = request.args.get('email')
@@ -264,7 +319,7 @@ def sites():
 
 ################# Cohort Info  ######################
 @app.route("/cohorts/new", methods=['POST'])
-def new_cohort():
+def newCohort():
     if request.method == 'POST':
         name = request.args.get('name')
         site_id = request.args.get('site_id')
@@ -277,6 +332,10 @@ def new_cohort():
             return "Something went wrong", 401
 
 
+@app.route('/cohorts/<id>', methods=['GET'])
+def cohort(id):
+    return Cohort.query.get(id).to_dict(), 200
+
 
 @app.route('/cohorts', methods=['GET'])
 def cohorts():
@@ -288,7 +347,7 @@ def cohorts():
 ########################   Partner Info #########################
 
 @app.route("/partners/new", methods=['POST'])
-def new_partner():
+def newPartner():
     if request.method == 'POST':
         name = request.args.get('name')
         company = request.args.get('company')
@@ -312,13 +371,13 @@ def partners():
 
 
 ######################### Attendance ###########################
-@app.route("/attendances/new", methods=['POST', 'GET'])
-def new_attendance():
+@app.route("/cohorts/<id>/attendances/new", methods=['POST', 'GET'])
+def newAttendance(id):
     if request.method == 'POST':
-        admin_id = request.args.get('admin_id')
-        cohort_id = request.args.get('cohort_id')
-        student_id = admin_id = request.args.get('student_id')
-        notes = request.args.get('notes')
+        admin_id = request.json['admin_id']
+        cohort_id = id
+        student_id = request.json['student_id']
+        notes = request.json['notes']
        
         new_attendance = Attendance(notes=notes, admin_id=admin_id, cohort_id=cohort_id, student_id=student_id)
         
@@ -330,9 +389,9 @@ def new_attendance():
             return "something happpend wrong"        
     return render_template('attendance.html', students=students)
 
-@app.route('/attendances', methods=['GET'])
-def attendances():
-    attendances = Attendance.query.all()
+@app.route('/cohorts/<id>/attendances', methods=['GET'])
+def attendances(id):
+    attendances = Attendance.query.filter_by(cohort_id = id)[::-1]
     serialzied = [a.serialize() for a in attendances]
     return serialzied, 200
 
@@ -341,18 +400,18 @@ def attendances():
 ######################### Students ###########################
 
 
-@app.route('/students', methods=['GET', 'POST'])
-def students():
-    students = Student.query.all()
+@app.route('/cohorts/<id>/students', methods=['GET', 'POST'])
+def students(id):
+    students = Student.query.filter_by(cohort_id = id)[::-1]
     serialzied = [s.serialize() for s in students]
     return serialzied, 200
 
 
-@app.route("/students/new", methods=['POST'])
-def new_student():
+@app.route("/cohorts/<id>/students/new", methods=['POST'])
+def newStudent(id):
     if request.method == 'POST':
         name = request.args.get('name')
-        cohort_id = request.args.get('cohort_id')
+        cohort_id = id
         new_student = Student(name=name, cohort_id=cohort_id)
         try: 
             db.session.add(new_student)

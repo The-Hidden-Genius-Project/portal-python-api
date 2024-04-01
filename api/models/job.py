@@ -10,6 +10,8 @@ class Job(db.Model):
     type = db.Column(db.String(80), nullable=False) # should this be an option # figure out if this should be a real object
     organization_id = db.Column(db.Integer, db.ForeignKey('organization.id'))
     partner_id = db.Column(db.Integer, db.ForeignKey('partner.id'))
+    organization  = db.relationship('Organization', backref=db.backref('jobs', lazy=True))
+    partner = db.relationship('Partner', backref=db.backref('jobs', lazy=True))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
     def serialize(self):
@@ -18,6 +20,7 @@ class Job(db.Model):
             "title": self.title,
             "description": self.description,
             "type": self.type,
-            "organation_id": self.organization_id,
+            "partner_id": self.partner_id,
+            "organization_id": self.organization_id,
             "date_created": self.date_created
         }

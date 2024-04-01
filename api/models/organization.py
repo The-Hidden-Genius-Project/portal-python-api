@@ -5,8 +5,10 @@ class Organization(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
     location = db.Column(db.String)
-    partner_id = db.Column(db.Integer, db.ForeignKey('partner.id'))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    partner_id = db.Column(db.Integer, db.ForeignKey('partner.id'))
+    partner = db.relationship('Partner', backref=db.backref('organizations', lazy=True))
+
 
     def serialize(self):
         return {
