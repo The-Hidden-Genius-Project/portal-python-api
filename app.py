@@ -156,7 +156,8 @@ def newUser():
         response = UsersController.newUser(
             request.args.get("google_id"),
             request.args.get("name"),
-            request.args.get("email")
+            request.args.get("email"), 
+            request.args.get('role_id')
         )
         return response
     else: 
@@ -431,4 +432,5 @@ def api():
 
 # Run the app. 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
