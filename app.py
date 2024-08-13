@@ -20,6 +20,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from api.models.job import Job
 from api.models.user import User
 from api.models.role import Role
+from api.models.event import Event
 from api.models.organization import Organization
 from api.models.application import Application
 from api.models.admin import Admin
@@ -108,7 +109,7 @@ def callback():
     print(session['google_id'])
     print(session['name'])
     # check if user email is valid
-    return redirect("/dashboard")
+    return redirect("/")
 
 
 
